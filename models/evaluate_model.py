@@ -55,4 +55,4 @@ with open("results/model_results.txt", "w") as f:
     f.write(str(confusion_matrix(y_test, rf_predictions)))
     f.write("\n\n")
 
-print("\nResults saved in results/model_results.txt")
+print("\nResults saved in results/model_results.txt")
