@@ -10,7 +10,7 @@ Speech signals are processed to extract **MFCC (Mel Frequency Cepstral Coefficie
 This project uses the **ASVspoof 2019 Logical Access (LA) dataset**, a standard dataset used in research for voice spoofing detection.
 
 Download the dataset from:
-https://datashare.ed.ac.uk/handle/10283/3336
+https://www.kaggle.com/datasets/awsaf49/asvpoof-2019-dataset
 
 After downloading, place it in the project folder like this:
 
