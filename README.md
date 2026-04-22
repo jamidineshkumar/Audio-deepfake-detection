@@ -1,18 +1,22 @@
-# Audio Deepfake Detection using MFCC and Machine Learning
+# 🎙️ Audio Deepfake Detection using MFCC and Machine Learning
 
-## Overview
+## 📌 Overview
 
-This project detects **AI-generated (deepfake) audio** using machine learning.
-Speech signals are processed to extract **MFCC (Mel Frequency Cepstral Coefficients)** features, which are then used to train classifiers that distinguish between **real (bonafide)** and **fake (spoof)** audio.
+This project focuses on detecting AI-generated (deepfake) audio using classical machine learning techniques. Speech signals are processed to extract **MFCC (Mel Frequency Cepstral Coefficients)** features, which are then used to train multiple classifiers to distinguish between:
 
-## Dataset
+* **Bonafide** → Real human speech
+* **Spoof** → AI-generated or manipulated audio
 
-This project uses the **ASVspoof 2019 Logical Access (LA) dataset**, a standard dataset used in research for voice spoofing detection.
+---
 
-Download the dataset from:
+## 📂 Dataset
+
+This project uses the **ASVspoof 2019 Logical Access (LA)** dataset, a standard benchmark for voice spoofing detection.
+
+🔗 Download from:
 https://www.kaggle.com/datasets/awsaf49/asvpoof-2019-dataset
 
-After downloading, place it in the project folder like this:
+### 📁 Folder Structure (after download)
 
 ```
 DATASET/
@@ -22,63 +26,81 @@ DATASET/
     └── ASVspoof2019_LA_eval
 ```
 
-The dataset contains:
+---
 
-* **bonafide** → real human speech
-* **spoof** → AI-generated or manipulated speech
-
-## Project Structure
+## 🏗️ Project Structure
 
 ```
-audio-deepfake-detection
+audio-deepfake-detection/
 │
-├── app
-├── data_processing
-├── models
-├── notebooks
-├── utils
-├── results
-├── saved_models
+├── app/                  # Frontend + backend (web interface)
+├── data_processing/      # Feature extraction (MFCC)
+├── models/               # Training & evaluation scripts
+├── notebooks/            # Experimentation (Jupyter notebooks)
+├── utils/                # Helper functions
+├── results/              # Evaluation outputs
+├── saved_models/         # Trained models (ignored in Git)
 │
 ├── config.yaml
 ├── requirements.txt
 └── README.md
 ```
 
-## Installation
+---
 
-Clone the repository:
+## ⚙️ Installation
 
-```
+```bash
 git clone https://github.com/NirmitSingh-main/audio-deepfake-detection.git
 cd audio-deepfake-detection
-```
-
-Install dependencies:
-
-```
 pip install -r requirements.txt
 ```
 
-## Train the Model
+---
+
+## 🧠 Models Trained
+
+The following machine learning models have been trained using MFCC features:
+
+* Support Vector Machine (**SVM**)
+* Random Forest (**RF**)
+* Logistic Regression (**LR**)
+* Linear Regression
+* Gaussian Naive Bayes (**NB**)
+* Gradient Boosting (**GB**)
+* Artificial Neural Network (**ANN**)
+
+📁 Saved in:
 
 ```
+saved_models/
+```
+
+> ⚠️ Note: Trained model files (`.pkl`) are not included in the repository due to size constraints. You need to train them locally.
+
+---
+
+## 🚀 Train the Models
+
+```bash
 python -m models.train_model
 ```
 
 This will:
 
 * Extract MFCC features
-* Train **SVM** and **Random Forest** models
-* Save trained models in `saved_models/`
+* Train all models
+* Save them in `saved_models/`
 
-## Evaluation
+---
 
-```
+## 📊 Evaluate Models
+
+```bash
 python -m models.evaluate_model
 ```
 
-Evaluation metrics include:
+### Metrics:
 
 * Accuracy
 * Precision
@@ -86,7 +108,31 @@ Evaluation metrics include:
 * F1 Score
 * Confusion Matrix
 
-## Technologies Used
+Results are stored in:
+
+```
+results/model_results.txt
+```
+
+---
+
+## 🌐 Run the Application
+
+```bash
+python app/backend.py
+```
+
+---
+
+## ⚠️ Important Notes
+
+* Ensure dataset is placed correctly in `DATASET/`
+* Models must be trained before running the backend
+* `.pkl` files are ignored via `.gitignore`
+
+---
+
+## 🛠️ Technologies Used
 
 * Python
 * Librosa
@@ -95,8 +141,25 @@ Evaluation metrics include:
 * Scikit-learn
 * Matplotlib
 
-## Future Improvements
+---
 
-* Deep learning models (CNN/LSTM)
-* Real-time deepfake detection
-* Web deployment
+## 🔮 Future Improvements
+
+* Deep learning models (CNN, LSTM)
+* Real-time audio deepfake detection
+* Deployment (Flask / FastAPI / Cloud)
+* Model optimization & feature engineering
+
+---
+
+## 📌 Author
+
+**Nirmit Singh**
+
+---
+
+## ⭐ Contributing
+
+Pull requests are welcome. For major changes, please open an issue first.
+
+---
