@@ -1,343 +1,465 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Deepfake Detection</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>Detect Synthetic</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&family=Orbitron:wght@700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg: #0f172a;
-            --glass: rgba(30, 41, 59, 0.7);
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --success: #22c55e;
-            --error: #ef4444;
-            --card-border: rgba(255, 255, 255, 0.1);
+            --bg: #050505;
+            --panel: #0a0b0e;
+            --accent-cyan: #00e5ff;
+            --accent-pink: #ff0055;
+            --accent-purple: #9d4edd;
+            --text-main: #ffffff;
+            --text-dim: #7a8294;
+            --border: rgba(255, 255, 255, 0.08);
         }
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
         }
 
         body {
             background-color: var(--bg);
-            background-image: 
-                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 80% 80%, rgba(79, 70, 229, 0.15) 0%, transparent 40%);
-            color: var(--text);
+            color: var(--text-main);
+            font-family: 'Roboto Mono', monospace;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 600px;
-            width: 100%;
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
+            align-items: center;
             padding: 40px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.8s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .main-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            gap: 40px;
         }
 
-        h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            background: linear-gradient(to right, #818cf8, #c084fc);
+        .left-panel {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(4rem, 8vw, 7rem);
+            font-weight: 900;
+            line-height: 0.9;
+            margin-bottom: 30px;
+            letter-spacing: -2px;
+            background: linear-gradient(180deg, #ffffff 40%, #888888 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-align: center;
+            text-transform: uppercase;
         }
 
-        p.subtitle {
-            color: var(--text-muted);
-            text-align: center;
-            margin-bottom: 32px;
-            font-size: 0.95rem;
+        .hero-desc {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            max-width: 500px;
+            line-height: 1.8;
+            margin-bottom: 50px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .upload-zone {
-            border: 2px dashed var(--card-border);
-            border-radius: 16px;
-            padding: 40px 20px;
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.01);
+            padding: 80px 40px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: relative;
-            background: rgba(255, 255, 255, 0.02);
+            max-width: 700px;
+            margin-bottom: 30px;
         }
 
-        .upload-zone:hover {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.05);
-        }
-
-        .upload-zone.dragging {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.1);
-            transform: scale(1.02);
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 0.03);
         }
 
         .upload-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            display: block;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            color: black;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 24px;
         }
 
-        .file-info {
-            margin-top: 16px;
-            font-size: 0.9rem;
-            color: var(--primary);
-            font-weight: 600;
-            display: none;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        button {
-            width: 100%;
-            margin-top: 24px;
-            padding: 14px;
-            border-radius: 12px;
-            border: none;
-            background: var(--primary);
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
+        .upload-btn {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 15px 30px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+            max-width: 250px;
+            text-align: center;
         }
 
-        button:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        .upload-btn:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
         }
 
-        button:disabled {
-            background: #475569;
+        .upload-btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
         }
 
-        .results {
-            margin-top: 32px;
-            display: none;
-            animation: slideUp 0.5s ease-out;
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .panel-card {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 25px;
         }
 
-        .result-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-        }
-
-        .result-header {
+        .panel-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            letter-spacing: 3px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 30px;
         }
 
-        .model-name {
-            font-weight: 600;
-            color: var(--text-muted);
-            font-size: 0.85rem;
+        .best-model-badge {
+            background: var(--accent-cyan);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.65rem;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+
+        .inference-file {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .inference-file::before {
+            content: "!";
+            color: var(--text-dim);
+            font-weight: bold;
+        }
+
+        .verdict {
+            font-size: 4rem;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            color: #1a1c23;
+            margin: 10px 0;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-style: italic;
+            transition: color 0.3s, text-shadow 0.3s;
         }
 
-        .prediction {
-            font-size: 1.25rem;
-            font-weight: 700;
+        .verdict.real {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
         }
 
-        .prediction.fake { color: var(--error); }
-        .prediction.real { color: var(--success); }
-
-        .loader {
-            display: none;
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
+        .verdict.fake {
+            color: var(--accent-pink);
+            text-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .model-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 30px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .error-msg {
-            color: var(--error);
-            text-align: center;
-            margin-top: 16px;
-            font-size: 0.9rem;
-            display: none;
+        .model-stats div span {
+            display: block;
+            font-size: 1rem;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .val-purple {
+            color: var(--accent-purple);
+        }
+
+        .val-dim {
+            color: var(--text-dim);
+        }
+
+        .val-white {
+            color: white;
+        }
+
+        canvas {
+            margin-top: 20px;
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Audio Defender</h1>
-        <p class="subtitle">Upload an audio file to detect deepfakes using AI models</p>
+    <div class="main-container">
+        <div class="left-panel">
+            <h1 class="hero-title">DETECT<br>SYNTHETIC</h1>
+            <p class="hero-desc">Deploy neural pattern filters and spectral signature extraction. Identify high-fidelity
+                AI voice clones using our best-in-class ANN architecture.</p>
 
-        <form id="uploadForm">
-            <label for="audioFile" class="upload-zone" id="dropZone">
-                <span class="upload-icon">🎙️</span>
-                <span id="dropText">Drop audio file here or click to browse</span>
-                <div id="fileInfo" class="file-info"></div>
-                <input type="file" id="audioFile" accept="audio/*" required>
-            </label>
-            
-            <button type="submit" id="submitBtn">
-                <span id="btnText">Analyze Audio</span>
-                <div class="loader" id="loader"></div>
-            </button>
-        </form>
-
-        <div id="errorMsg" class="error-msg"></div>
-
-        <div class="results" id="results">
-            <div class="result-card">
-                <div class="result-header">
-                    <span class="model-name">SVM Analysis</span>
+            <form id="uploadForm">
+                <input type="file" id="audioFile" accept="audio/*" style="display:none;" required>
+                <div class="upload-zone" id="dropZone" onclick="document.getElementById('audioFile').click()">
+                    <div class="upload-icon">↑</div>
+                    <div style="font-weight: bold; letter-spacing: 2px; font-size: 0.9rem;">DROP WAV, MP3, OR FLAC</div>
+                    <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 10px; letter-spacing: 1px;">MAX
+                        FILE SIZE: 25MB</div>
+                    <div id="fileInfo"
+                        style="margin-top: 20px; color: var(--accent-cyan); font-size: 0.8rem; display: none;"></div>
                 </div>
-                <div id="svmResult" class="prediction">--</div>
+                <button type="submit" class="upload-btn" id="submitBtn">Analyze Payload</button>
+            </form>
+        </div>
+
+        <div class="right-panel">
+            <!-- Top Panel: Live Inference -->
+            <div class="panel-card">
+                <div class="panel-title">
+                    LIVE INFERENCE
+                    <span class="best-model-badge">POWERED BY ANN</span>
+                </div>
+
+                <div class="inference-file" id="resFile">FILE: <span
+                        style="color:var(--text-dim)">STAGED_NONE.null</span></div>
+
+                <div class="verdict" id="resVerdict">PENDING</div>
+
+                <div class="model-stats">
+                    <div>MODEL<br><span class="val-purple">NEURAL_X V2</span></div>
+                    <div>CONFIDENCE<br><span class="val-dim" id="resConfidence">00.0%</span></div>
+                </div>
             </div>
-            
-            <div class="result-card">
-                <div class="result-header">
-                    <span class="model-name">Random Forest Analysis</span>
+
+            <!-- Bottom Panel: Metrics -->
+            <div class="panel-card" style="flex: 1;">
+                <div class="panel-title">MODEL PERFORMANCE METRICS</div>
+                <div style="height: 300px; width: 100%; position: relative;">
+                    <canvas id="metricsChart"></canvas>
                 </div>
-                <div id="rfResult" class="prediction">--</div>
             </div>
         </div>
     </div>
 
     <script>
-        const dropZone = document.getElementById('dropZone');
+        // Upload logic
         const fileInput = document.getElementById('audioFile');
         const fileInfo = document.getElementById('fileInfo');
-        const dropText = document.getElementById('dropText');
-        const uploadForm = document.getElementById('uploadForm');
-        const results = document.getElementById('results');
         const submitBtn = document.getElementById('submitBtn');
-        const btnText = document.getElementById('btnText');
-        const loader = document.getElementById('loader');
-        const errorMsg = document.getElementById('errorMsg');
+        const dropZone = document.getElementById('dropZone');
+        const uploadForm = document.getElementById('uploadForm');
 
-        // Drag and drop handlers
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragging'), false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragging'), false);
-        });
-
-        dropZone.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            fileInput.files = files;
-            updateFileInfo();
-        }
-
-        fileInput.addEventListener('change', updateFileInfo);
-
-        function updateFileInfo() {
+        fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
-                fileInfo.textContent = `Selected: ${fileInput.files[0].name}`;
+                fileInfo.textContent = `TARGET ACQUIRED: ${fileInput.files[0].name.toUpperCase()}`;
                 fileInfo.style.display = 'block';
-                dropText.style.display = 'none';
+                document.getElementById('resFile').innerHTML = `FILE: <span style="color:white">${fileInput.files[0].name.toUpperCase()}</span>`;
             }
-        }
+        });
+
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', (e) => { dropZone.classList.remove('dragover'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
 
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            if (!fileInput.files[0]) return;
+            if (!fileInput.files.length) return;
 
-            // Reset state
-            results.style.display = 'none';
-            errorMsg.style.display = 'none';
+            const verdictElem = document.getElementById('resVerdict');
+            verdictElem.textContent = 'ANALYZING...';
+            verdictElem.className = 'verdict';
+            verdictElem.style.color = 'var(--text-dim)';
+            document.getElementById('resConfidence').textContent = '--.-%';
             submitBtn.disabled = true;
-            btnText.style.display = 'none';
-            loader.style.display = 'block';
+            submitBtn.textContent = 'PROCESSING...';
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
 
             try {
-                const response = await fetch('/predict', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) throw new Error('Failed to analyze audio');
-
+                const response = await fetch('/predict', { method: 'POST', body: formData });
                 const data = await response.json();
-                
-                // Update UI
-                const svmElem = document.getElementById('svmResult');
-                const rfElem = document.getElementById('rfResult');
 
-                svmElem.textContent = data.predictions.svm;
-                svmElem.className = `prediction ${data.predictions.svm.toLowerCase()}`;
-                
-                rfElem.textContent = data.predictions.random_forest;
-                rfElem.className = `prediction ${data.predictions.random_forest.toLowerCase()}`;
-
-                results.style.display = 'block';
+                verdictElem.textContent = data.prediction.toUpperCase();
+                verdictElem.className = 'verdict ' + data.prediction.toLowerCase();
+                verdictElem.style.color = '';
+                document.getElementById('resConfidence').className = 'val-white';
+                document.getElementById('resConfidence').textContent = data.accuracy;
             } catch (err) {
-                errorMsg.textContent = err.message;
-                errorMsg.style.display = 'block';
+                console.error(err);
+                verdictElem.textContent = 'ERROR';
+                verdictElem.className = 'verdict fake';
+                verdictElem.style.color = '';
             } finally {
                 submitBtn.disabled = false;
-                btnText.style.display = 'block';
-                loader.style.display = 'none';
+                submitBtn.textContent = 'ANALYZE PAYLOAD';
             }
         });
+
+        // Chart.js customized to match the image
+        const initChart = () => {
+            const ctx = document.getElementById('metricsChart').getContext('2d');
+
+            Chart.defaults.font.family = "'Roboto Mono', monospace";
+            Chart.defaults.color = '#7a8294';
+
+            // We highlight ANN brightly, and use a dim orange/yellow tint for others
+            const dimOrange = 'rgba(255, 136, 0, 0.25)';
+            const dimYellow = 'rgba(255, 204, 0, 0.25)';
+
+            const colorsAcc = ['#00e5ff', dimOrange, dimOrange, dimOrange, dimOrange, dimOrange, dimOrange];
+            const colorsF1 = ['#ff0055', dimYellow, dimYellow, dimYellow, dimYellow, dimYellow, dimYellow];
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['ANN (BEST)', 'SVM', 'RANDOM FOREST', 'GRADIENT BOOSTING', 'LIN. REG.', 'LOG. REG.', 'NAIVE BAYES'],
+                    datasets: [
+                        {
+                            label: 'ACCURACY',
+                            data: [99, 97, 96, 95, 91, 85, 71],
+                            backgroundColor: colorsAcc,
+                            borderWidth: 0,
+                            borderRadius: 4,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.5
+                        },
+                        {
+                            label: 'F1 SCORE',
+                            data: [96, 94, 87, 82, 57, 72, 57],
+                            backgroundColor: colorsF1,
+                            borderWidth: 0,
+                            borderRadius: 4,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 10 },
+                                color: (ctx) => ctx.tick.value === 100 ? '#00e5ff' : '#333333'
+                            },
+                            border: { display: false },
+                            max: 100
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 10, weight: 'bold' },
+                                color: (ctx) => ctx.index === 0 ? '#ffffff' : '#7a8294'
+                            },
+                            border: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                boxWidth: 8,
+                                boxHeight: 8,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { size: 10 },
+                                padding: 20,
+                                color: '#7a8294'
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(10, 11, 14, 0.95)',
+                            titleFont: { family: "'Roboto Mono', monospace", size: 12 },
+                            bodyFont: { family: "'Roboto Mono', monospace", size: 11 },
+                            titleColor: '#00e5ff',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            padding: 10
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'customNumberLabels',
+                    afterDraw(chart) {
+                        const ctx = chart.ctx;
+                        chart.data.datasets.forEach((dataset, i) => {
+                            if (i === 1) return; // Only draw numbers from the first dataset to avoid overlapping text at the margin
+                            const meta = chart.getDatasetMeta(i);
+                            meta.data.forEach((bar, index) => {
+                                const data = chart.data.datasets[0].data[index];
+                                ctx.fillStyle = index === 0 ? '#ffffff' : '#7a8294';
+                                ctx.font = 'bold 10px "Roboto Mono"';
+                                ctx.textAlign = 'right';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(data, chart.chartArea.right + 25, bar.y);
+                            });
+                        });
+                    }
+                }]
+            });
+        };
+
+        initChart();
     </script>
 </body>
+
 </html>

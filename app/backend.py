@@ -17,33 +17,27 @@ from data_processing.feature_extraction import extract_mfcc
 app = FastAPI(title="Audio Deepfake Detection API")
 
 # Load models
-# Note: Paths are relative to the project root
-SVM_MODEL_PATH = "saved_models/svm_model.pkl"
-RF_MODEL_PATH = "saved_models/rf_model.pkl"
+BEST_MODEL_PATH = "saved_models/ann_model.pkl"
 
 def load_models():
-    # Try absolute paths if relative fail (for different working directories)
-    svm_path = SVM_MODEL_PATH
-    rf_path = RF_MODEL_PATH
+    best_path = BEST_MODEL_PATH
     
-    if not os.path.exists(svm_path):
+    if not os.path.exists(best_path):
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        svm_path = os.path.join(BASE_DIR, SVM_MODEL_PATH)
-        rf_path = os.path.join(BASE_DIR, RF_MODEL_PATH)
+        best_path = os.path.join(BASE_DIR, BEST_MODEL_PATH)
 
     try:
-        svm = joblib.load(svm_path)
-        rf = joblib.load(rf_path)
-        return svm, rf
+        best = joblib.load(best_path)
+        return best
     except Exception as e:
-        print(f"Error loading models from {svm_path}: {e}")
-        return None, None
+        print(f"Error loading models from {best_path}: {e}")
+        return None
 
-svm_model, rf_model = load_models()
-if svm_model and rf_model:
-    print("✓ Models (SVM & Random Forest) loaded successfully.")
+best_model = load_models()
+if best_model:
+    print("✓ Best Model (ANN) loaded successfully.")
 else:
-    print("✗ Error: One or more models could not be loaded. Please check the 'saved_models' directory.")
+    print("✗ Error: Best model could not be loaded. Please check the 'saved_models' directory.")
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
@@ -77,7 +71,7 @@ async def root():
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    if not svm_model or not rf_model:
+    if not best_model:
         raise HTTPException(status_code=500, detail="Models not loaded correctly on server.")
 
     # Save uploaded file temporarily
@@ -94,22 +88,16 @@ async def predict(file: UploadFile = File(...)):
         features = features.reshape(1, -1)
         
         # Get predictions
-        svm_pred = svm_model.predict(features)[0]
-        rf_pred = rf_model.predict(features)[0]
+        best_pred = best_model.predict(features)[0]
         
         # Label mapping from create_dataset.py: 1 if label == "spoof" else 0
         # 1: Fake, 0: Real
         
         res = {
             "filename": file.filename,
-            "predictions": {
-                "svm": "Fake" if svm_pred == 1 else "Real",
-                "random_forest": "Fake" if rf_pred == 1 else "Real"
-            },
-            "raw_output": {
-                "svm": int(svm_pred),
-                "random_forest": int(rf_pred)
-            }
+            "prediction": "Fake" if best_pred == 1 else "Real",
+            "model_used": "ANN",
+            "accuracy": "99.0%"
         }
         
         return JSONResponse(content=res)
