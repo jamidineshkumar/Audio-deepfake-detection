@@ -88,7 +88,7 @@ python -m models.train_model
 
 This will:
 
-* Extract MFCC features
+* Extract MFCC features(MFCC EXTRACTION , PITCH , MEL FILTERBANK,MFCC SEQUENCE)
 * Train all models
 * Save them in `saved_models/`
 
@@ -140,6 +140,8 @@ python app/backend.py
 * Pandas
 * Scikit-learn
 * Matplotlib
+* TENSORFLOW
+* FASTAPI
 
 ---
 
@@ -154,7 +156,7 @@ python app/backend.py
 
 ## 📌 Author
 
-**Nirmit Singh**
+**Jami Dinesh Kumar**
 
 ---
 
