@@ -1,465 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detect Synthetic</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&family=Orbitron:wght@700;900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg: #050505;
-            --panel: #0a0b0e;
-            --accent-cyan: #00e5ff;
-            --accent-pink: #ff0055;
-            --accent-purple: #9d4edd;
-            --text-main: #ffffff;
-            --text-dim: #7a8294;
-            --border: rgba(255, 255, 255, 0.08);
+            --bg: #050505; --panel: #0a0b0e; --accent-cyan: #00e5ff;
+            --accent-pink: #ff0055; --accent-purple: #9d4edd;
+            --text-main: #ffffff; --text-dim: #7a8294; --border: rgba(255, 255, 255, 0.08);
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: 'Roboto Mono', monospace;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
+            background-color: var(--bg); color: var(--text-main);
+            font-family: 'Roboto Mono', monospace; min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; padding: 40px;
         }
-
-        .main-container {
-            display: flex;
-            width: 100%;
-            max-width: 1400px;
-            gap: 40px;
-        }
-
-        .left-panel {
-            flex: 1.5;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .hero-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(4rem, 8vw, 7rem);
-            font-weight: 900;
-            line-height: 0.9;
-            margin-bottom: 30px;
-            letter-spacing: -2px;
-            background: linear-gradient(180deg, #ffffff 40%, #888888 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
-        }
-
-        .hero-desc {
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            max-width: 500px;
-            line-height: 1.8;
-            margin-bottom: 50px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .upload-zone {
-            border: 1px dashed var(--border);
-            border-radius: 8px;
-            background-color: rgba(255, 255, 255, 0.01);
-            padding: 80px 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            max-width: 700px;
-            margin-bottom: 30px;
-        }
-
-        .upload-zone:hover,
-        .upload-zone.dragover {
-            border-color: rgba(255, 255, 255, 0.3);
-            background-color: rgba(255, 255, 255, 0.03);
-        }
-
-        .upload-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: white;
-            color: black;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-            font-size: 24px;
-        }
-
-        .upload-btn {
-            background: transparent;
-            color: var(--text-dim);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            padding: 15px 30px;
-            font-family: inherit;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: background 0.3s, color 0.3s, border-color 0.3s;
-            max-width: 250px;
-            text-align: center;
-        }
-
-        .upload-btn:hover {
-            border-color: var(--text-main);
-            color: var(--text-main);
-        }
-
-        .upload-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .right-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .panel-card {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 25px;
-        }
-
-        .panel-title {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            letter-spacing: 3px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .best-model-badge {
-            background: var(--accent-cyan);
-            color: #000;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 0.65rem;
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
-        }
-
-        .inference-file {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .inference-file::before {
-            content: "!";
-            color: var(--text-dim);
-            font-weight: bold;
-        }
-
-        .verdict {
-            font-size: 4rem;
-            font-weight: 900;
-            font-family: 'Orbitron', sans-serif;
-            color: #1a1c23;
-            margin: 10px 0;
-            text-transform: uppercase;
-            font-style: italic;
-            transition: color 0.3s, text-shadow 0.3s;
-        }
-
-        .verdict.real {
-            color: var(--accent-cyan);
-            text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
-        }
-
-        .verdict.fake {
-            color: var(--accent-pink);
-            text-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
-        }
-
-        .model-stats {
-            display: flex;
-            gap: 40px;
-            margin-top: 30px;
-            font-size: 0.7rem;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .model-stats div span {
-            display: block;
-            font-size: 1rem;
-            margin-top: 5px;
-            font-weight: bold;
-        }
-
-        .val-purple {
-            color: var(--accent-purple);
-        }
-
-        .val-dim {
-            color: var(--text-dim);
-        }
-
-        .val-white {
-            color: white;
-        }
-
-        canvas {
-            margin-top: 20px;
-        }
+        .main-container { display: flex; width: 100%; max-width: 1400px; gap: 40px; }
+        .left-panel { flex: 1.5; display: flex; flex-direction: column; }
+        .hero-title { font-family: 'Orbitron', sans-serif; font-size: 5.5rem; font-weight: 900; line-height: 0.9; margin-bottom: 30px; letter-spacing: -2px; background: linear-gradient(180deg, #ffffff 40%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; }
+        .hero-desc { color: var(--text-dim); font-size: 0.85rem; max-width: 500px; line-height: 1.8; margin-bottom: 50px; text-transform: uppercase; letter-spacing: 1px; }
+        .upload-zone { border: 1px dashed var(--border); border-radius: 8px; background-color: rgba(255,255,255,0.01); padding: 80px 40px; text-align: center; cursor: pointer; transition: all 0.3s ease; max-width: 700px; margin-bottom: 30px; }
+        .upload-icon { width: 50px; height: 50px; border-radius: 50%; background: white; color: black; display: inline-flex; justify-content: center; align-items: center; margin-bottom: 20px; font-weight: bold; font-size: 24px; }
+        .upload-btn { background: transparent; color: var(--text-dim); border: 1px solid var(--border); cursor: pointer; padding: 15px 30px; font-family: inherit; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s; width: fit-content; }
+        .upload-btn:hover { border-color: var(--text-main); color: var(--text-main); }
+        .right-panel { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+        .panel-card { background-color: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 25px; }
+        .panel-title { font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 3px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .best-model-badge { background: var(--accent-cyan); color: #000; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 0.65rem; }
+        .model-selector { background: #1a1c23; color: var(--accent-cyan); border: 1px solid var(--border); font-family: 'Roboto Mono', monospace; font-size: 0.7rem; padding: 8px; margin-bottom: 15px; width: 100%; outline: none; text-transform: uppercase; }
+        .verdict { font-size: 4rem; font-weight: 900; font-family: 'Orbitron', sans-serif; color: #1a1c23; margin: 10px 0; text-transform: uppercase; font-style: italic; }
+        .verdict.real { color: var(--accent-cyan); text-shadow: 0 0 20px rgba(0, 229, 255, 0.4); }
+        .verdict.fake { color: var(--accent-pink); text-shadow: 0 0 20px rgba(255, 0, 85, 0.4); }
+        .val-white { color: white; font-size: 1rem; font-weight: bold; }
+        .val-purple { color: var(--accent-purple); font-size: 1rem; font-weight: bold; }
     </style>
 </head>
-
 <body>
     <div class="main-container">
         <div class="left-panel">
             <h1 class="hero-title">DETECT<br>SYNTHETIC</h1>
-            <p class="hero-desc">Deploy neural pattern filters and spectral signature extraction. Identify high-fidelity
-                AI voice clones using our best-in-class ANN architecture.</p>
-
+            <p class="hero-desc">Deploy neural pattern filters and spectral signature extraction. Identifying high-fidelity AI voice clones using multi-model architecture.</p>
             <form id="uploadForm">
                 <input type="file" id="audioFile" accept="audio/*" style="display:none;" required>
                 <div class="upload-zone" id="dropZone" onclick="document.getElementById('audioFile').click()">
                     <div class="upload-icon">↑</div>
                     <div style="font-weight: bold; letter-spacing: 2px; font-size: 0.9rem;">DROP WAV, MP3, OR FLAC</div>
-                    <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 10px; letter-spacing: 1px;">MAX
-                        FILE SIZE: 25MB</div>
-                    <div id="fileInfo"
-                        style="margin-top: 20px; color: var(--accent-cyan); font-size: 0.8rem; display: none;"></div>
+                    <div id="fileInfo" style="margin-top: 20px; color: var(--accent-cyan); font-size: 0.8rem; display: none;"></div>
                 </div>
                 <button type="submit" class="upload-btn" id="submitBtn">Analyze Payload</button>
             </form>
         </div>
 
         <div class="right-panel">
-            <!-- Top Panel: Live Inference -->
             <div class="panel-card">
-                <div class="panel-title">
-                    LIVE INFERENCE
-                    <span class="best-model-badge">POWERED BY ANN</span>
-                </div>
-
-                <div class="inference-file" id="resFile">FILE: <span
-                        style="color:var(--text-dim)">STAGED_NONE.null</span></div>
-
+                <div class="panel-title">LIVE INFERENCE <span class="best-model-badge">SENSOR ACTIVE</span></div>
+                <select id="modelChoice" class="model-selector">
+                    <option value="xgb_model">XGBOOST (BEST)</option>
+                    <option value="ann_model">ANN (NEURAL_X)</option>
+                    <option value="svm_model">SVM</option>
+                    <option value="rf_model">RANDOM FOREST</option>
+                    <option value="gb_model">GRADIENT BOOSTING</option>
+                </select>
+                <div id="resFile" style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px;">FILE: STAGED_NONE.null</div>
                 <div class="verdict" id="resVerdict">PENDING</div>
-
-                <div class="model-stats">
-                    <div>MODEL<br><span class="val-purple">NEURAL_X V2</span></div>
-                    <div>CONFIDENCE<br><span class="val-dim" id="resConfidence">00.0%</span></div>
+                <div style="display: flex; gap: 40px; margin-top: 30px; font-size: 0.7rem; color: var(--text-dim);">
+                    <div>ACTIVE<br><span class="val-purple" id="activeModelDisplay">XGBOOST</span></div>
+                    <div>CONFIDENCE<br><span class="val-white" id="resConfidence">00.0%</span></div>
                 </div>
             </div>
-
-            <!-- Bottom Panel: Metrics -->
             <div class="panel-card" style="flex: 1;">
                 <div class="panel-title">MODEL PERFORMANCE METRICS</div>
-                <div style="height: 300px; width: 100%; position: relative;">
-                    <canvas id="metricsChart"></canvas>
-                </div>
+                <div style="height: 350px;"><canvas id="metricsChart"></canvas></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Upload logic
         const fileInput = document.getElementById('audioFile');
         const fileInfo = document.getElementById('fileInfo');
         const submitBtn = document.getElementById('submitBtn');
-        const dropZone = document.getElementById('dropZone');
         const uploadForm = document.getElementById('uploadForm');
 
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
-                fileInfo.textContent = `TARGET ACQUIRED: ${fileInput.files[0].name.toUpperCase()}`;
+                const name = fileInput.files[0].name.toUpperCase();
+                fileInfo.textContent = `TARGET ACQUIRED: ${name}`;
                 fileInfo.style.display = 'block';
-                document.getElementById('resFile').innerHTML = `FILE: <span style="color:white">${fileInput.files[0].name.toUpperCase()}</span>`;
-            }
-        });
-
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone.addEventListener('dragleave', (e) => { dropZone.classList.remove('dragover'); });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                fileInput.dispatchEvent(new Event('change'));
+                document.getElementById('resFile').innerHTML = `FILE: <span style="color:white">${name}</span>`;
             }
         });
 
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!fileInput.files.length) return;
-
             const verdictElem = document.getElementById('resVerdict');
+            const model = document.getElementById('modelChoice').value;
             verdictElem.textContent = 'ANALYZING...';
             verdictElem.className = 'verdict';
-            verdictElem.style.color = 'var(--text-dim)';
-            document.getElementById('resConfidence').textContent = '--.-%';
             submitBtn.disabled = true;
-            submitBtn.textContent = 'PROCESSING...';
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
 
             try {
-                const response = await fetch('/predict', { method: 'POST', body: formData });
+                const response = await fetch(`/predict?model_type=${model}`, { method: 'POST', body: formData });
                 const data = await response.json();
-
                 verdictElem.textContent = data.prediction.toUpperCase();
                 verdictElem.className = 'verdict ' + data.prediction.toLowerCase();
-                verdictElem.style.color = '';
-                document.getElementById('resConfidence').className = 'val-white';
-                document.getElementById('resConfidence').textContent = data.accuracy;
+                document.getElementById('resConfidence').textContent = data.confidence;
+                document.getElementById('activeModelDisplay').textContent = model.split('_')[0].toUpperCase();
             } catch (err) {
-                console.error(err);
                 verdictElem.textContent = 'ERROR';
                 verdictElem.className = 'verdict fake';
-                verdictElem.style.color = '';
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'ANALYZE PAYLOAD';
             }
         });
 
-        // Chart.js customized to match the image
-        const initChart = () => {
-            const ctx = document.getElementById('metricsChart').getContext('2d');
+        // Initialize original thin-bar chart
+        const ctx = document.getElementById('metricsChart').getContext('2d');
+        const dimOrange = 'rgba(255, 136, 0, 0.25)';
+        const dimYellow = 'rgba(255, 204, 0, 0.25)';
 
-            Chart.defaults.font.family = "'Roboto Mono', monospace";
-            Chart.defaults.color = '#7a8294';
-
-            // We highlight ANN brightly, and use a dim orange/yellow tint for others
-            const dimOrange = 'rgba(255, 136, 0, 0.25)';
-            const dimYellow = 'rgba(255, 204, 0, 0.25)';
-
-            const colorsAcc = ['#00e5ff', dimOrange, dimOrange, dimOrange, dimOrange, dimOrange, dimOrange];
-            const colorsF1 = ['#ff0055', dimYellow, dimYellow, dimYellow, dimYellow, dimYellow, dimYellow];
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['ANN (BEST)', 'SVM', 'RANDOM FOREST', 'GRADIENT BOOSTING', 'LIN. REG.', 'LOG. REG.', 'NAIVE BAYES'],
-                    datasets: [
-                        {
-                            label: 'ACCURACY',
-                            data: [99, 97, 96, 95, 91, 85, 71],
-                            backgroundColor: colorsAcc,
-                            borderWidth: 0,
-                            borderRadius: 4,
-                            barPercentage: 0.6,
-                            categoryPercentage: 0.5
-                        },
-                        {
-                            label: 'F1 SCORE',
-                            data: [96, 94, 87, 82, 57, 72, 57],
-                            backgroundColor: colorsF1,
-                            borderWidth: 0,
-                            borderRadius: 4,
-                            barPercentage: 0.6,
-                            categoryPercentage: 0.5
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                font: { size: 10 },
-                                color: (ctx) => ctx.tick.value === 100 ? '#00e5ff' : '#333333'
-                            },
-                            border: { display: false },
-                            max: 100
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: {
-                                font: { size: 10, weight: 'bold' },
-                                color: (ctx) => ctx.index === 0 ? '#ffffff' : '#7a8294'
-                            },
-                            border: { display: false }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            align: 'end',
-                            labels: {
-                                boxWidth: 8,
-                                boxHeight: 8,
-                                usePointStyle: true,
-                                pointStyle: 'circle',
-                                font: { size: 10 },
-                                padding: 20,
-                                color: '#7a8294'
-                            }
-                        },
-                        tooltip: {
-                            enabled: true,
-                            backgroundColor: 'rgba(10, 11, 14, 0.95)',
-                            titleFont: { family: "'Roboto Mono', monospace", size: 12 },
-                            bodyFont: { family: "'Roboto Mono', monospace", size: 11 },
-                            titleColor: '#00e5ff',
-                            borderColor: 'rgba(255, 255, 255, 0.1)',
-                            borderWidth: 1,
-                            padding: 10
-                        }
-                    }
-                },
-                plugins: [{
-                    id: 'customNumberLabels',
-                    afterDraw(chart) {
-                        const ctx = chart.ctx;
-                        chart.data.datasets.forEach((dataset, i) => {
-                            if (i === 1) return; // Only draw numbers from the first dataset to avoid overlapping text at the margin
-                            const meta = chart.getDatasetMeta(i);
-                            meta.data.forEach((bar, index) => {
-                                const data = chart.data.datasets[0].data[index];
-                                ctx.fillStyle = index === 0 ? '#ffffff' : '#7a8294';
-                                ctx.font = 'bold 10px "Roboto Mono"';
-                                ctx.textAlign = 'right';
-                                ctx.textBaseline = 'middle';
-                                ctx.fillText(data, chart.chartArea.right + 25, bar.y);
-                            });
-                        });
-                    }
-                }]
-            });
-        };
-
-        initChart();
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['XGBOOST', 'ANN', 'SVM', 'RANDOM FOREST', 'GRADIENT BOOSTING', 'LIN. REG.', 'LOG. REG.', 'NAIVE BAYES'],
+                datasets: [
+                    { label: 'ACCURACY', data: [99.2, 99, 97, 96, 95, 91, 85, 71], backgroundColor: ['#00e5ff', dimOrange, dimOrange, dimOrange, dimOrange, dimOrange, dimOrange, dimOrange], barPercentage: 0.4 },
+                    { label: 'F1 SCORE', data: [98.5, 96, 94, 87, 82, 57, 72, 57], backgroundColor: ['#ff0055', dimYellow, dimYellow, dimYellow, dimYellow, dimYellow, dimYellow, dimYellow], barPercentage: 0.4 }
+                ]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                scales: { x: { grid: { display: false }, max: 100 }, y: { grid: { display: false }, ticks: { color: '#7a8294', font: { size: 9 } } } },
+                plugins: { legend: { display: true, align: 'end', labels: { boxWidth: 8, color: '#7a8294', usePointStyle: true } } }
+            }
+        });
     </script>
 </body>
-
 </html>

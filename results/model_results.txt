@@ -1,108 +1,123 @@
 Model Evaluation Results & Comparison
 ======================================
 
---- Support Vector Machine (SVM) ---
+--- SVM ---
 Classification Report:
               precision    recall  f1-score   support
 
-           0       0.81      0.98      0.89       509
-           1       1.00      0.97      0.99      4567
+           0       1.00      0.96      0.98      4567
+           1       0.75      0.97      0.85       509
 
     accuracy                           0.97      5076
-   macro avg       0.90      0.98      0.94      5076
-weighted avg       0.98      0.97      0.98      5076
+   macro avg       0.87      0.97      0.91      5076
+weighted avg       0.97      0.97      0.97      5076
 
 Confusion Matrix:
-[[ 500    9]
- [ 120 4447]]
+[[4405  162]
+ [  15  494]]
 
---- Random Forest (RF) ---
+--- Random Forest ---
 Classification Report:
               precision    recall  f1-score   support
 
-           0       0.95      0.64      0.76       509
-           1       0.96      1.00      0.98      4567
+           0       0.95      1.00      0.97      4567
+           1       0.95      0.57      0.71       509
 
-    accuracy                           0.96      5076
-   macro avg       0.96      0.82      0.87      5076
-weighted avg       0.96      0.96      0.96      5076
+    accuracy                           0.95      5076
+   macro avg       0.95      0.78      0.84      5076
+weighted avg       0.95      0.95      0.95      5076
 
 Confusion Matrix:
-[[ 324  185]
- [  16 4551]]
+[[4551   16]
+ [ 220  289]]
 
 --- Logistic Regression ---
 Classification Report:
               precision    recall  f1-score   support
 
-           0       0.38      0.85      0.52       509
-           1       0.98      0.85      0.91      4567
+           0       0.99      0.90      0.94      4567
+           1       0.51      0.91      0.65       509
 
-    accuracy                           0.85      5076
-   macro avg       0.68      0.85      0.72      5076
-weighted avg       0.92      0.85      0.87      5076
+    accuracy                           0.90      5076
+   macro avg       0.75      0.90      0.80      5076
+weighted avg       0.94      0.90      0.91      5076
 
 Confusion Matrix:
-[[ 432   77]
- [ 707 3860]]
+[[4123  444]
+ [  48  461]]
 
 --- Gradient Boosting ---
 Classification Report:
               precision    recall  f1-score   support
 
-           0       0.87      0.53      0.66       509
-           1       0.95      0.99      0.97      4567
+           0       0.95      0.99      0.97      4567
+           1       0.90      0.57      0.70       509
 
     accuracy                           0.95      5076
-   macro avg       0.91      0.76      0.82      5076
-weighted avg       0.94      0.95      0.94      5076
+   macro avg       0.93      0.78      0.84      5076
+weighted avg       0.95      0.95      0.95      5076
 
 Confusion Matrix:
-[[ 272  237]
- [  39 4528]]
+[[4536   31]
+ [ 220  289]]
 
 --- Naive Bayes ---
 Classification Report:
               precision    recall  f1-score   support
 
-           0       0.21      0.71      0.33       509
-           1       0.96      0.71      0.81      4567
+           0       0.96      0.70      0.81      4567
+           1       0.22      0.76      0.34       509
 
     accuracy                           0.71      5076
-   macro avg       0.59      0.71      0.57      5076
-weighted avg       0.88      0.71      0.76      5076
+   macro avg       0.59      0.73      0.58      5076
+weighted avg       0.89      0.71      0.77      5076
 
 Confusion Matrix:
-[[ 363  146]
- [1338 3229]]
+[[3212 1355]
+ [ 124  385]]
 
 --- ANN ---
 Classification Report:
               precision    recall  f1-score   support
 
-           0       0.92      0.93      0.93       509
-           1       0.99      0.99      0.99      4567
+           0       0.99      0.99      0.99      4567
+           1       0.94      0.94      0.94       509
 
     accuracy                           0.99      5076
-   macro avg       0.96      0.96      0.96      5076
+   macro avg       0.97      0.97      0.97      5076
 weighted avg       0.99      0.99      0.99      5076
 
 Confusion Matrix:
-[[ 472   37]
- [  39 4528]]
+[[4539   28]
+ [  30  479]]
 
 --- Linear Regression ---
 Classification Report:
               precision    recall  f1-score   support
 
-           0       0.95      0.10      0.19       509
-           1       0.91      1.00      0.95      4567
+           0       0.93      1.00      0.96      4567
+           1       0.94      0.37      0.53       509
 
-    accuracy                           0.91      5076
-   macro avg       0.93      0.55      0.57      5076
-weighted avg       0.91      0.91      0.88      5076
+    accuracy                           0.93      5076
+   macro avg       0.94      0.68      0.75      5076
+weighted avg       0.93      0.93      0.92      5076
 
 Confusion Matrix:
-[[  53  456]
- [   3 4564]]
+[[4555   12]
+ [ 320  189]]
+
+--- XGBoost ---
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.98      0.99      0.98      4567
+           1       0.91      0.77      0.84       509
+
+    accuracy                           0.97      5076
+   macro avg       0.94      0.88      0.91      5076
+weighted avg       0.97      0.97      0.97      5076
+
+Confusion Matrix:
+[[4530   37]
+ [ 115  394]]
 
